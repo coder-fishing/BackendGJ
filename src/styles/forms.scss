@@ -1,0 +1,151 @@
+.create-job-container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: #f0f0f0;
+        color: #333;
+      }
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #333;
+      margin: 0;
+    }
+  }
+
+  .error-message {
+    background-color: #fff1f0;
+    border: 1px solid #ffccc7;
+    color: #f5222d;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .job-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .form-group {
+      margin-bottom: 1.5rem;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+
+        &[for="salary.negotiable"] {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          font-weight: normal;
+
+          input[type="checkbox"] {
+            margin: 0;
+          }
+        }
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="date"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+
+        &:focus {
+          outline: none;
+          border-color: #007bff;
+        }
+
+        &::placeholder {
+          color: #999;
+        }
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #eee;
+
+      button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &.btn-outline {
+          background: none;
+          border: 2px solid #007bff;
+          color: #007bff;
+
+          &:hover {
+            background-color: #007bff;
+            color: white;
+          }
+        }
+
+        &.btn-primary {
+          background-color: #007bff;
+          color: white;
+          border: none;
+
+          &:hover {
+            background-color: #0056b3;
+          }
+
+          &:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+} 

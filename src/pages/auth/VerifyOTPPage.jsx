@@ -25,7 +25,14 @@ const VerifyOTPPage = () => {
 
     // Redirect if already logged in
     if (isAuthenticated()) {
-      navigate('/dashboard');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'EMPLOYER') {
+        navigate('/employer/dashboard');
+      } else {
+        navigate('/jobs');
+      }
     }
     
     if (authError) {
@@ -49,15 +56,18 @@ const VerifyOTPPage = () => {
       
       // Check if the user is now authenticated
       if (response.token || isAuthenticated()) {
-        // Redirect to dashboard after successful verification if authenticated
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Redirect based on role
+        if (user.role === 'ADMIN') {
+          navigate('/admin/dashboard');
+        } else if (user.role === 'EMPLOYER') {
+          navigate('/employer/dashboard');
+        } else {
+          navigate('/jobs');
+        }
       } else {
         // Otherwise redirect to login page
-        setTimeout(() => {
-          navigate('/admin/login');
-        }, 2000);
+        navigate('/user/login');
       }
     } catch (err) {
       console.error('Verification error:', err);

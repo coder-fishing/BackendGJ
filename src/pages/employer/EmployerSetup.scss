@@ -1,0 +1,325 @@
+// Variables
+$primary-color: #2196f3;
+$secondary-color: #1976d2;
+$success-color: #4caf50;
+$error-color: #f44336;
+$text-color: #1e293b;
+$border-color: #e2e8f0;
+$background-color: #f8fafc;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin transition {
+  transition: all 0.3s ease;
+}
+
+.employer-setup-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+  .setup-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    h2 {
+      font-size: 2rem;
+      color: $text-color;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    p {
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+  }
+
+  .error-message {
+    background-color: rgba($error-color, 0.1);
+    color: $error-color;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    border: 1px solid rgba($error-color, 0.2);
+  }
+
+  .setup-form {
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group {
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+
+        label {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+          color: $text-color;
+          font-weight: 600;
+          font-size: 1rem;
+
+          svg {
+            color: $primary-color;
+            font-size: 1.25rem;
+            @include transition;
+          }
+        }
+
+        input,
+        select,
+        textarea {
+          width: 90%;
+          padding: 0.75rem 1rem;
+          border: 2px solid $border-color;
+          border-radius: 10px;
+          font-size: 1rem;
+          @include transition;
+          background: white;
+          color: $text-color;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+
+          &::placeholder {
+            color: #94a3b8;
+          }
+
+          &:hover {
+            border-color: $primary-color;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+          }
+        }
+
+        textarea {
+          width: 95%;
+        }
+
+        select {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232196f3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 1rem center;
+          background-size: 1.5rem;
+          padding-right: 2.5rem;
+
+          &:hover {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231976d2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+          }
+        }
+
+        textarea {
+          padding: 0.75rem 1rem;
+          min-height: 120px;
+          resize: vertical;
+          line-height: 1.5;
+          
+          &::-webkit-scrollbar {
+            width: 8px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: $background-color;
+            border-radius: 4px;
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+            
+            &:hover {
+              background: #94a3b8;
+            }
+          }
+        }
+
+        .logo-upload {
+          position: relative;
+          width: 90%;
+          margin: 0 auto;
+
+          .logo-preview {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 2px dashed $border-color;
+            border-radius: 10px;
+            background: white;
+            @include transition;
+            position: relative;
+            min-height: 200px;
+            @include flex-center;
+            cursor: pointer;
+            overflow: hidden;
+
+            &:hover {
+              border-color: $primary-color;
+              
+              .image-actions {
+                opacity: 1;
+              }
+            }
+
+            img {
+              max-width: 200px;
+              height: auto;
+              max-height: 200px;
+              display: block;
+              margin: 0 auto;
+              border-radius: 8px;
+              object-fit: contain;
+            }
+
+            .image-actions {
+              position: absolute;
+              inset: 0;
+              background: rgba(0, 0, 0, 0.4);
+              @include flex-center;
+              opacity: 0;
+              @include transition;
+
+              button {
+                width: 45px;
+                height: 45px;
+                border: none;
+                border-radius: 50%;
+                background: white;
+                color: $text-color;
+                cursor: pointer;
+                @include flex-center;
+                @include transition;
+                
+                svg {
+                  font-size: 1.25rem;
+                  color: $primary-color;
+                }
+
+                &:hover {
+                  background: $primary-color;
+                  transform: scale(1.1);
+                  
+                  svg {
+                    color: white;
+                  }
+                }
+
+                &:active {
+                  transform: scale(1);
+                }
+              }
+            }
+
+            .empty-preview {
+              text-align: center;
+              padding: 1.5rem;
+              color: #94a3b8;
+              @include flex-center;
+              flex-direction: column;
+
+              svg {
+                font-size: 2.5rem;
+                margin-bottom: 0.75rem;
+                color: $primary-color;
+              }
+
+              p {
+                margin: 0;
+                font-size: 1rem;
+                font-weight: 500;
+              }
+
+              small {
+                display: block;
+                margin-top: 0.5rem;
+                font-size: 0.875rem;
+                opacity: 0.8;
+              }
+            }
+          }
+
+          .file-input {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  .form-actions {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid $border-color;
+    display: flex;
+    justify-content: center;
+
+    .submit-button {
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      @include transition;
+      box-shadow: 0 4px 6px rgba($primary-color, 0.2);
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba($primary-color, 0.3);
+        background: linear-gradient(135deg, $secondary-color, darken($secondary-color, 5%));
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// Animation for notifications
+@keyframes slideIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.notification {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 

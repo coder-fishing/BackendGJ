@@ -1,49 +1,42 @@
 // components/Search/SearchFilter.jsx
 import React, { useState } from 'react';
-import { AiOutlineSearch, AiOutlineEnvironment, AiOutlineDollar, AiOutlineClockCircle, AiOutlineTag, AiOutlineClear } from 'react-icons/ai';
+import { Input, Button } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import './SearchFilter.scss';
 
 const SearchFilter = ({ filters, onFilterChange }) => {
-  const [searchInput, setSearchInput] = useState(filters.search || '');
+  const [searchText, setSearchText] = useState(filters.search || '');
   
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    onFilterChange({ search: searchInput });
+  const handleSearch = () => {
+    onFilterChange({ search: searchText });
   };
 
-  // Để tự động apply filter khi chọn dropdown
-  const handleSelectChange = (e) => {
-    onFilterChange({ [e.target.name]: e.target.value });
-  };
-
-  const clearFilters = () => {
-    setSearchInput('');
-    onFilterChange({
-      search: '',
-      location: '',
-      salary: '',
-      jobType: '',
-      status: ''
-    });
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
-    <div className="search-filter-container">
-      <form className="search-form" onSubmit={handleSearchSubmit}>
-        <div className="search-input-group">
-          <input
-            type="text"
-            placeholder="Tìm theo tên công việc, công ty..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            aria-label="Search jobs"
-          />
-          <button type="submit" className="search-button" aria-label="Search">
-            <AiOutlineSearch />
-          </button>
-        </div>
-      </form>
-      
+    <div className="search-filter">
+      <div className="search-row">
+        <Input
+          placeholder="Tìm kiếm theo tên công việc..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyPress={handleKeyPress}
+          prefix={<SearchOutlined />}
+          className="search-input"
+          allowClear
+        />
+        <Button 
+          type="primary" 
+          onClick={handleSearch}
+          icon={<SearchOutlined />}
+        >
+          Tìm kiếm
+        </Button>
+      </div>
     </div>
   );
 };

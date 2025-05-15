@@ -67,4 +67,5 @@ export const ActionIcons = {
   approve: <FaCheck />
 };
 
+export { ActionButtons };
 export default ActionButtons; 

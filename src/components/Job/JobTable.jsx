@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { 
   AiOutlineClose, 
   AiOutlineFileSearch
@@ -17,7 +18,8 @@ import { jobsApi } from '../../services/api';
 import ActionButtons, { ActionIcons } from '../UI/ActionButtons';
 import './JobTable.scss';
 
-const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateText, getStatusClass, getStatusText, refreshJobs }) => {
+const JobTable = memo(({ jobs: initialJobs, activeTab, tabs, formatDate, formatSalary, truncateText, getStatusClass, getStatusText, refreshJobs, formatSalaryUpto }) => {
+  const [jobs, setJobs] = useState(initialJobs);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -27,10 +29,16 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
   const [success, setSuccess] = useState(null);
   const [deletingJobIds, setDeletingJobIds] = useState([]);
   const [restoringJobIds, setRestoringJobIds] = useState([]);
+  const [employerInfo, setEmployerInfo] = useState(null);
   
   // Toast notification state
   const [toast, setToast] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
+
+  // Update local jobs when initialJobs changes
+  useEffect(() => {
+    setJobs(initialJobs);
+  }, [initialJobs]);
 
   // Hiển thị toast message
   const showToast = (message, type = 'success') => {
@@ -71,16 +79,32 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
     setSuccess(null);
   };
 
-  // Mở modal xem chi tiết
+  // Fetch employer info
+  const fetchEmployerInfo = async (employerId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/employers/${employerId}`);
+      setEmployerInfo(response.data);
+    } catch (err) {
+      console.error('Error fetching employer info:', err);
+      showToast('Không thể tải thông tin người đăng', 'error');
+    }
+  };
+
+  // Mở modal xem chi tiết và fetch employer info
   const handleOpenDetailModal = (job) => {
     setSelectedJob(job);
     setShowDetailModal(true);
+    setEmployerInfo(null); // Reset employer info
+    if (job.employerId) {
+      fetchEmployerInfo(job.employerId);
+    }
   };
 
-  // Đóng modal xem chi tiết
+  // Đóng modal xem chi tiết và reset employer info
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedJob(null);
+    setEmployerInfo(null);
   };
 
   // Xử lý từ chối job
@@ -95,19 +119,22 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
     
     try {
       await jobsApi.rejectJob(selectedJob.jobId, { rejectionReason });
+      
+      // Cập nhật state ngay lập tức
+      setJobs(prevJobs => prevJobs.filter(job => job.jobId !== selectedJob.jobId));
+      
       setSuccess('Đã từ chối thành công');
-      setLoading(false);
+      showToast('Đã từ chối bài đăng thành công', 'success');
       
       // Đóng modal sau 1.5 giây
       setTimeout(() => {
         handleCloseRejectModal();
-        // Cập nhật lại danh sách job
+        // Cập nhật lại danh sách job từ server
         if (refreshJobs) refreshJobs();
-        // Hiển thị toast sau khi đóng modal
-        showToast('Đã từ chối bài đăng thành công', 'success');
       }, 1500);
     } catch (err) {
       setError(`Lỗi khi từ chối: ${err.message || 'Không thể từ chối'}`);
+    } finally {
       setLoading(false);
     }
   };
@@ -118,28 +145,22 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
       return;
     }
     
-    // Thêm jobId vào danh sách đang xóa
     setDeletingJobIds(prev => [...prev, jobId]);
     
     try {
-      // Đổi method từ DELETE sang PUT hoặc POST nếu server yêu cầu
       await jobsApi.deleteJob(jobId);
       
-      // Hiển thị toast và cập nhật danh sách
-      setTimeout(() => {
-        // Xóa jobId khỏi danh sách đang xóa
-        setDeletingJobIds(prev => prev.filter(id => id !== jobId));
-        // Cập nhật lại danh sách job
-        if (refreshJobs) refreshJobs();
-        // Hiển thị toast message
-        showToast('Đã xóa bài đăng thành công', 'success');
-      }, 1000);
+      // Cập nhật state ngay lập tức
+      setJobs(prevJobs => prevJobs.filter(job => job.jobId !== jobId));
+      
+      showToast('Đã xóa bài đăng thành công', 'success');
+      
+      // Cập nhật lại danh sách từ server
+      if (refreshJobs) refreshJobs();
     } catch (err) {
       console.error('Error deleting job:', err);
       
-      // Xử lý lỗi 405 Method Not Allowed
       let errorMessage = 'Không thể xóa bài đăng';
-      
       if (err.response) {
         if (err.response.status === 405) {
           errorMessage = 'Phương thức xóa không được hỗ trợ. Vui lòng kiểm tra lại API.';
@@ -150,158 +171,110 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
         errorMessage = `Lỗi khi xóa: ${err.message}`;
       }
       
-      // Hiển thị toast thông báo lỗi
       showToast(errorMessage, 'error');
-      
-      // Xóa jobId khỏi danh sách đang xóa
+    } finally {
       setDeletingJobIds(prev => prev.filter(id => id !== jobId));
     }
   };
 
-  // Xử lý khôi phục job (approve)
+  // Xử lý khôi phục job
   const handleRestoreJob = async (jobId) => {
-    // Thêm jobId vào danh sách đang khôi phục
     setRestoringJobIds(prev => [...prev, jobId]);
     
     try {
-      // Gọi API để khôi phục (approve) job
       await jobsApi.approveJob(jobId);
       
-      // Hiển thị toast và cập nhật danh sách
-      setTimeout(() => {
-        // Xóa jobId khỏi danh sách đang khôi phục
-        setRestoringJobIds(prev => prev.filter(id => id !== jobId));
-        // Cập nhật lại danh sách job
-        if (refreshJobs) refreshJobs();
-        // Hiển thị toast message
-        showToast('Đã khôi phục bài đăng thành công', 'success');
-      }, 1000);
+      // Cập nhật state ngay lập tức
+      setJobs(prevJobs => prevJobs.filter(job => job.jobId !== jobId));
+      
+      showToast('Đã khôi phục bài đăng thành công', 'success');
+      
+      // Cập nhật lại danh sách từ server
+      if (refreshJobs) refreshJobs();
     } catch (err) {
       console.error('Error restoring job:', err);
       
-      // Xử lý lỗi
       let errorMessage = 'Không thể khôi phục bài đăng';
-      
       if (err.response) {
         errorMessage = `Lỗi khi khôi phục: ${err.response.status} - ${err.response.statusText}`;
       } else if (err.message) {
         errorMessage = `Lỗi khi khôi phục: ${err.message}`;
       }
       
-      // Hiển thị toast thông báo lỗi
       showToast(errorMessage, 'error');
-      
-      // Xóa jobId khỏi danh sách đang khôi phục
+    } finally {
       setRestoringJobIds(prev => prev.filter(id => id !== jobId));
     }
   };
 
-  // Kiểm tra xem job có đang được xóa không
-  const isDeleting = (jobId) => {
-    return deletingJobIds.includes(jobId);
-  };
-
-  // Kiểm tra xem job có đang được khôi phục không
-  const isRestoring = (jobId) => {
-    return restoringJobIds.includes(jobId);
-  };
-
-  // Kiểm tra các điều kiện hiển thị cho các nút
-  const canReject = (job) => {
-    return job.status === 'PENDING';
-  };
-
-  const canRestore = (job) => {
-    return job.status === 'DELETED';
-  };
-  
-  const canDelete = (job) => {
-    return job.status !== 'DELETED'; // Không hiển thị nút xóa cho bài đăng đã xóa
-  };
-
-  // Thêm điều kiện hiển thị nút phê duyệt (chỉ cho bài PENDING)
-  const canApprove = (job) => {
-    return job.status === 'PENDING';
-  };
-
-  // Xử lý phê duyệt bài đăng
+  // Xử lý phê duyệt job
   const handleApproveJob = async (jobId) => {
-    // Thêm jobId vào danh sách đang khôi phục (dùng cùng state)
     setRestoringJobIds(prev => [...prev, jobId]);
     
     try {
-      // Gọi API để phê duyệt job
       await jobsApi.approveJob(jobId);
       
-      // Hiển thị toast và cập nhật danh sách
-      setTimeout(() => {
-        // Xóa jobId khỏi danh sách đang xử lý
-        setRestoringJobIds(prev => prev.filter(id => id !== jobId));
-        // Cập nhật lại danh sách job
-        if (refreshJobs) refreshJobs();
-        // Hiển thị toast message
-        showToast('Đã phê duyệt bài đăng thành công', 'success');
-      }, 1000);
+      // Cập nhật state ngay lập tức
+      setJobs(prevJobs => prevJobs.filter(job => job.jobId !== jobId));
+      
+      showToast('Đã phê duyệt bài đăng thành công', 'success');
+      
+      // Cập nhật lại danh sách từ server
+      if (refreshJobs) refreshJobs();
     } catch (err) {
       console.error('Error approving job:', err);
       
-      // Xử lý lỗi
       let errorMessage = 'Không thể phê duyệt bài đăng';
-      
       if (err.response) {
         errorMessage = `Lỗi khi phê duyệt: ${err.response.status} - ${err.response.statusText}`;
       } else if (err.message) {
         errorMessage = `Lỗi khi phê duyệt: ${err.message}`;
       }
       
-      // Hiển thị toast thông báo lỗi
       showToast(errorMessage, 'error');
-      
-      // Xóa jobId khỏi danh sách đang khôi phục
+    } finally {
       setRestoringJobIds(prev => prev.filter(id => id !== jobId));
     }
   };
 
-  return (
-    <div className="table-container">
-      {/* Toast notification */}
-      {toast && (
-        <div className={`toast-container ${toastVisible ? 'visible' : ''} ${toast.type}`}>
-          <div className="toast-content">
-            <span>{toast.message}</span>
-            <button className="toast-close" onClick={() => setToastVisible(false)}>
-              <AiOutlineClose />
-            </button>
-          </div>
-        </div>
-      )}
+  // Kiểm tra xem job có đang được xóa không
+  const isDeleting = (jobId) => deletingJobIds.includes(jobId);
 
-      <table className="job-table">
-        <thead>
-          <tr>
-            <th className="title-column">Tiêu đề</th>
-            <th className="requirement-column">Yêu cầu</th>
-            <th className="job-type-column">Loại hình</th>
-            <th className="date-column">Ngày đăng</th>
-            <th className="status-column">Trạng thái</th>
-            <th className="view-count-column">Lượt xem</th>
-            <th className="apply-count-column">Ứng tuyển</th>
-            <th className="salary-column">Mức lương</th>
-            <th className="actions-column">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jobs.length === 0 ? (
+  // Kiểm tra xem job có đang được khôi phục không
+  const isRestoring = (jobId) => restoringJobIds.includes(jobId);
+
+  // Kiểm tra các điều kiện hiển thị cho các nút
+  const canReject = (job) => job.status === 'PENDING';
+  const canRestore = (job) => job.status === 'DELETED';
+  const canDelete = (job) => job.status !== 'DELETED';
+  const canApprove = (job) => job.status === 'PENDING';
+
+  console.log("JobTable re-rendered with", jobs.length, "jobs"); // Debug re-render
+
+  return (
+    <div className="table-container" >
+      {jobs.length === 0 ? (
+        <div className="empty-message" >
+          <AiOutlineFileSearch />
+          <p>Không có bài đăng nào{activeTab !== 'ALL' ? ` trong mục ${tabs.find(tab => tab.id === activeTab)?.label || activeTab}` : ''}</p>
+        </div>
+      ) : (
+        <table className="job-table">
+          <thead>
             <tr>
-              <td colSpan="9" className="empty-message">
-                <div>
-                  <AiOutlineFileSearch size={32} />
-                  <p>Không có bài đăng nào{activeTab !== 'ALL' ? ` trong mục ${tabs.find(tab => tab.value === activeTab)?.label || activeTab}` : ''}</p>
-                </div>
-              </td>
+              <th className="title-column">Tiêu đề</th>
+              <th className="description-column">Mô tả</th>
+              <th className="job-type-column">Loại việc làm</th>
+              <th className="date-column">Ngày đăng</th>
+              <th className="status-column">Trạng thái</th>
+              <th className="view-count-column">Lượt xem</th>
+              <th className="apply-count-column">Lượt ứng tuyển</th>
+              <th className="salary-column">Mức lương</th>
+              <th className="actions-column">Thao tác</th>
             </tr>
-          ) : (
-            jobs.map(job => (
+          </thead>
+          <tbody>
+            {jobs.map((job, index) => (
               <tr key={job.jobId}>
                 <td className="job-title" title={job.title}>
                   <Link to={`/jobs/edit/${job.jobId}`}>{truncateText(job.title, 30)}</Link>
@@ -319,59 +292,55 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
                 </td>
                 <td className="text-center">{job.viewCount}</td>
                 <td className="text-center">{job.applyCount}</td>
-                <td title={formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency)}>
-                  {truncateText(formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency), 15)}
+                <td title={formatSalaryUpto(job.salaryMax, job.salaryCurrency)}>
+                  {truncateText(formatSalaryUpto(job.salaryMax, job.salaryCurrency), 15)}
                 </td>
                 <td className="action-buttons">
-                  <ActionButtons 
+                  <ActionButtons
                     actions={[
                       {
                         icon: ActionIcons.view,
                         onClick: () => handleOpenDetailModal(job),
                         title: 'Xem chi tiết',
-                        className: 'btn-view',
-                        disabled: isDeleting(job.jobId) || isRestoring(job.jobId)
+                        className: 'btn-view'
                       },
-                      {
+                      ...(canApprove(job) ? [{
+                        icon: ActionIcons.approve,
+                        onClick: () => handleApproveJob(job.jobId),
+                        title: 'Phê duyệt',
+                        className: 'btn-approve'
+                      }] : []),
+                      ...(canReject(job) ? [{
                         icon: ActionIcons.reject,
                         onClick: () => handleOpenRejectModal(job),
-                        title: 'Từ chối bài đăng',
-                        className: 'btn-reject',
-                        disabled: isDeleting(job.jobId) || isRestoring(job.jobId),
-                        show: canReject(job)
-                      },
-                      {
+                        title: 'Từ chối',
+                        className: 'btn-reject'
+                      }] : []),
+                      ...(canRestore(job) ? [{
                         icon: ActionIcons.restore,
                         onClick: () => handleRestoreJob(job.jobId),
-                        title: isRestoring(job.jobId) ? 'Đang khôi phục...' : 'Khôi phục bài đăng',
-                        className: 'btn-restore',
-                        disabled: isDeleting(job.jobId) || isRestoring(job.jobId),
-                        loading: isRestoring(job.jobId),
-                        show: canRestore(job)
-                      },
-                      {
+                        title: 'Khôi phục',
+                        className: 'btn-restore'
+                      }] : []),
+                      ...(canDelete(job) ? [{
                         icon: ActionIcons.delete,
                         onClick: () => handleDeleteJob(job.jobId),
-                        title: isDeleting(job.jobId) ? 'Đang xóa...' : 'Xóa bài đăng',
-                        className: 'btn-delete',
-                        disabled: isDeleting(job.jobId) || isRestoring(job.jobId),
-                        loading: isDeleting(job.jobId),
-                        show: canDelete(job)
-                      }
+                        title: 'Xóa',
+                        className: 'btn-delete'
+                      }] : [])
                     ]}
-                    variant="with-dividers"
                   />
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
+      )}
 
-      {/* Modal từ chối */}
-      {showRejectModal && selectedJob && (
-        <div className="modal-overlay" onClick={handleCloseRejectModal}>
-          <div className="modal-container reject-modal" onClick={e => e.stopPropagation()}>
+      {/* Modals */}
+      {showRejectModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" >
             <div className="modal-header">
               <h3>Từ chối bài đăng</h3>
               <button className="close-button" onClick={handleCloseRejectModal}>
@@ -419,10 +388,9 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
         </div>
       )}
 
-      {/* Modal xem chi tiết */}
       {showDetailModal && selectedJob && (
-        <div className="modal-overlay" onClick={handleCloseDetailModal}>
-          <div className="modal-container detail-modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" >
+          <div className="modal-content" >
             <div className="modal-header">
               <h3>Chi tiết bài đăng</h3>
               <button className="close-button" onClick={handleCloseDetailModal}>
@@ -432,6 +400,33 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
             <div className="modal-body">
               <div className="job-detail">
                 <h2>{selectedJob.title}</h2>
+
+                {/* Employer Information Section */}
+                <div className="employer-info">
+                  <h4>Thông tin người đăng</h4>
+                  {employerInfo ? (
+                    <div className="employer-card">
+                      <div className="employer-avatar">
+                        <img 
+                          src={employerInfo.companyLogo || './../../assets/images/default-avatar.svg'} 
+                          alt={employerInfo.companyName}
+                          onError={(e) => {
+                            e.target.src = './../../assets/images/default-avatar.svg';
+                          }}
+                        />
+                      </div>
+                      <div className="employer-details">
+                        <p className="employer-name">{employerInfo.companyName}</p>
+                        <p className="employer-email">{employerInfo.contactPhone}</p>
+                        <p className="employer-email">{employerInfo.companyWebsite}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="employer-loading">
+                      <p>Đang tải thông tin người đăng...</p>
+                    </div>
+                  )}
+                </div>
                 
                 <div className="job-metadata">
                   <p><strong>ID:</strong> {selectedJob.jobId}</p>
@@ -517,9 +512,16 @@ const JobTable = ({ jobs, activeTab, tabs, formatDate, formatSalary, truncateTex
           </div>
         </div>
       )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`toast ${toastVisible ? 'show' : ''} ${toast.type}`} >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
-};
+});
 
 JobTable.propTypes = {
   jobs: PropTypes.arrayOf(
@@ -542,6 +544,7 @@ JobTable.propTypes = {
   tabs: PropTypes.array.isRequired,
   formatDate: PropTypes.func.isRequired,
   formatSalary: PropTypes.func.isRequired,
+  formatSalaryUpto: PropTypes.func.isRequired,
   truncateText: PropTypes.func.isRequired,
   getStatusClass: PropTypes.func.isRequired,
   getStatusText: PropTypes.func.isRequired,

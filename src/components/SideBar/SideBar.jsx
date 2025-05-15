@@ -32,12 +32,12 @@ const Sidebar = ({ collapsed = false, toggleSidebar, mobileOpen = false, toggleM
       title: 'Tổng quan',
       items: [
         { 
-          path: '/dashboard', 
+          path: '/admin/dashboard', 
           icon: <AiOutlineDashboard />, 
           label: 'Dashboard' 
         },
         { 
-          path: '/jobs', 
+          path: '/admin/jobs', 
           icon: <AiOutlineFile />, 
           label: 'Công Việc' 
         }
@@ -47,17 +47,17 @@ const Sidebar = ({ collapsed = false, toggleSidebar, mobileOpen = false, toggleM
       title: 'Quản lý',
       items: [
         { 
-          path: '/profile', 
+          path: '/admin/profile', 
           icon: <AiOutlineUser />, 
           label: 'Hồ Sơ' 
         },
         { 
-          path: '/candidates', 
+          path: '/admin/candidates', 
           icon: <AiOutlineTeam />, 
           label: 'Ứng viên' 
         },
         { 
-          path: '/calendar', 
+          path: '/admin/calendar', 
           icon: <AiOutlineCalendar />, 
           label: 'Lịch phỏng vấn' 
         }
@@ -67,7 +67,7 @@ const Sidebar = ({ collapsed = false, toggleSidebar, mobileOpen = false, toggleM
       title: 'Thống kê',
       items: [
         { 
-          path: '/analytics', 
+          path: '/admin/analytics', 
           icon: <AiOutlineBarChart />, 
           label: 'Phân tích' 
         }
@@ -76,11 +76,11 @@ const Sidebar = ({ collapsed = false, toggleSidebar, mobileOpen = false, toggleM
     {
       title: 'Hệ thống',
       items: [
-        { 
-          path: '/settings', 
-          icon: <AiOutlineSetting />, 
-          label: 'Cài Đặt' 
-        },
+        // { 
+        //   path: '/admin/settings', 
+        //   icon: <AiOutlineSetting />, 
+        //   label: 'Cài Đặt' 
+        // },
         { 
           path: '#', 
           icon: <AiOutlineLogout />, 

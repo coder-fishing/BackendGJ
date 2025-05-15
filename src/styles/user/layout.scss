@@ -1,0 +1,34 @@
+.user-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  
+  .user-main {
+    flex: 1;
+    margin-top: 60px;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    
+    .user-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .user-layout {
+    .user-main {
+      padding: 1rem 0.5rem;
+      
+      .user-content {
+        padding: 1rem;
+      }
+    }
+  }
+} 

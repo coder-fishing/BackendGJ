@@ -21,12 +21,10 @@ import {
   FaUserCheck
 } from 'react-icons/fa';
 import { MdOutlineRestoreFromTrash } from 'react-icons/md';
-import { jobsApi, notificationApi } from '../services/api';
+import { jobsApi, notificationApi } from '../../services/api';
 import { Bar, Pie } from 'react-chartjs-2'; // Import Pie chart from Chart.js
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-import { formatDistanceToNow, format } from 'date-fns';
-import { vi } from 'date-fns/locale';
-import '../styles/dashboard.scss'; // Import your styles
+import '../../styles/dashboard.scss'; // Import your styles
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -176,32 +174,32 @@ const DashboardPage = () => {
       case 'NEW_JOB':
         return (
           <span>
-            <strong>{notification.user || 'Người dùng'}</strong> đã tạo bài đăng mới <Link to={`/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
+            <strong>{notification.user || 'Người dùng'}</strong> đã tạo bài đăng mới <Link to={`/admin/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
           </span>
         );
       case 'APPROVE':
         return (
           <span>
-            <strong>{notification.user || 'Admin'}</strong> đã phê duyệt bài đăng <Link to={`/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
+            <strong>{notification.user || 'Admin'}</strong> đã phê duyệt bài đăng <Link to={`/admin/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
           </span>
         );
       case 'REJECT':
         return (
           <span>
-            <strong>{notification.user || 'Admin'}</strong> đã từ chối bài đăng <Link to={`/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
+            <strong>{notification.user || 'Admin'}</strong> đã từ chối bài đăng <Link to={`/admin/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
             {notification.reason && <span className="activity-reason"> Lý do: {notification.reason}</span>}
           </span>
         );
       case 'DELETE':
         return (
           <span>
-            <strong>{notification.user || 'Admin'}</strong> đã xóa bài đăng <Link to={`/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
+            <strong>{notification.user || 'Admin'}</strong> đã xóa bài đăng <Link to={`admin/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
           </span>
         );
       case 'RESTORE':
         return (
           <span>
-            <strong>{notification.user || 'Admin'}</strong> đã khôi phục bài đăng <Link to={`/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
+            <strong>{notification.user || 'Admin'}</strong> đã khôi phục bài đăng <Link to={`admin/jobs/${notification.jobId}`}>{notification.jobTitle}</Link>
           </span>
         );
       default:
@@ -209,9 +207,24 @@ const DashboardPage = () => {
     }
   };
 
-  // Định dạng thời gian
+  // Thay thế hàm formatTimeAgo
   const formatTimeAgo = (timestamp) => {
-    return formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: vi });
+    const now = new Date();
+    const date = new Date(timestamp);
+    const seconds = Math.floor((now - date) / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) {
+      return `${days} ngày trước`;
+    } else if (hours > 0) {
+      return `${hours} giờ trước`;
+    } else if (minutes > 0) {
+      return `${minutes} phút trước`;
+    } else {
+      return 'Vừa xong';
+    }
   };
 
   // Dữ liệu cho biểu đồ cột
@@ -324,35 +337,35 @@ const DashboardPage = () => {
           value={stats.total}
           icon={<AiOutlineFile />}
           color="green"
-          link="/jobs"
+          link="/admin/jobs"
         />
         <StatCard
           title="Đã duyệt"
           value={stats.approved}
           icon={<AiOutlineCheck />}
           color="blue"
-          link="/jobs/status/approved"
+          link="/admin/jobs/status/approved"
         />
         <StatCard
           title="Đang chờ"
           value={stats.pending}
           icon={<AiOutlineClockCircle />}
           color="yellow"
-          link="/jobs/status/pending"
+          link="/admin/jobs/status/pending"
         />
         <StatCard
           title="Từ chối"
           value={stats.rejected}
           icon={<AiOutlineClose />}
           color="red"
-          link="/jobs/status/rejected"
+          link="/admin/jobs/status/rejected"
         />
         <StatCard
           title="Đã xóa"
           value={stats.deleted}
           icon={<AiOutlineDelete />}
           color="gray"
-          link="/jobs/status/deleted"
+          link="/admin/jobs/status/deleted"
         />
         <StatCard
           title="Lượt xem"
@@ -371,7 +384,7 @@ const DashboardPage = () => {
           value={unreadCount}
           icon={<FaExclamationCircle />}
           color="orange"
-          link="/notifications"
+          link="/admin/notifications"
         />
       </section>
 
@@ -396,7 +409,7 @@ const DashboardPage = () => {
       <section className="dashboard-recent-activities">
         <div className="section-header">
           <h2>Hoạt động gần đây</h2>
-          <Link to="/notifications" className="view-all-link">
+          <Link to="/admin/notifications" className="view-all-link">
             Xem tất cả
           </Link>
         </div>

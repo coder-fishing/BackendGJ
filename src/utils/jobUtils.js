@@ -47,6 +47,20 @@ export const formatSalary = (min, max, currency) => {
   return `${formatter.format(min)} - ${formatter.format(max)}`;
 };
 
+export const formatSalaryUpto = (max, currency = 'VND') => {
+  if (max >= 1_000_000) {
+    const rounded = Math.round(max / 1_000_000);
+    return `Upto ${rounded}M ${currency}`;
+  } else if (max >= 10_000) {
+    const rounded = Math.round(max / 1_000);
+    return `Upto ${rounded}K ${currency}`;
+  } else {
+    const value = Math.round(max).toLocaleString('vi-VN');
+    return `Upto ${value} ${currency}`;
+  }
+};
+
+
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('vi-VN');

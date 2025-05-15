@@ -76,7 +76,7 @@ const RegisterPage = () => {
       setRegistrationSuccess(true);
       
       // Redirect to verification page
-      navigate(`/admin/verify?email=${encodeURIComponent(formData.email)}`);
+      navigate(`/auth/verify?email=${encodeURIComponent(formData.email)}`);
     } catch (err) {
       console.error('Registration error:', err);
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại sau.');

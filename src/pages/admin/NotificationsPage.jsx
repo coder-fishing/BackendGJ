@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaCheck, FaTrash, FaBell, FaFilter, FaSync, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { AiOutlineCheckCircle, AiOutlineBell, AiOutlineClose } from 'react-icons/ai';
-import { useNotifications } from '../utils/NotificationContext';
-import { notificationApi } from '../services/api';
-import { formatTimeAgo, formatDateTime } from '../utils/dateUtils';
-import ActionButtons, { ActionIcons } from '../components/UI/ActionButtons';
+import { useNotifications } from '../../utils/NotificationContext';
+import { notificationApi } from '../../services/api';
+import { formatTimeAgo, formatDateTime } from '../../utils/dateUtils';
+import ActionButtons, { ActionIcons } from '../../components/UI/ActionButtons';
 import './NotificationsPage.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -24,9 +24,14 @@ const NotificationsPage = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState(null);
+  const location = useLocation();
+  const highlightedNotificationRef = useRef(null);
   
   // Get markAllAsRead and refreshNotifications from context
   const { markAsRead, markMultipleAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  
+  // Get the highlighted notification ID from URL
+  const highlightedId = new URLSearchParams(location.search).get('highlight');
   
   // Show toast notification
   const showToast = (message, type = 'success') => {
@@ -66,6 +71,18 @@ const NotificationsPage = () => {
   useEffect(() => {
     fetchNotifications();
   }, [currentPage, pageSize, selectedFilter, readFilter]);
+  
+  // Effect to scroll to highlighted notification
+  useEffect(() => {
+    if (highlightedId && highlightedNotificationRef.current) {
+      highlightedNotificationRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add temporary highlight effect
+      highlightedNotificationRef.current.classList.add('highlighted');
+      setTimeout(() => {
+        highlightedNotificationRef.current.classList.remove('highlighted');
+      }, 2000);
+    }
+  }, [highlightedId, notifications]);
   
   const fetchNotifications = async () => {
     setLoading(true);
@@ -247,6 +264,7 @@ const NotificationsPage = () => {
   const renderNotificationRow = (notification) => {
     const details = getNotificationDetails(notification);
     const isSelected = selectedNotifications.includes(notification.id);
+    const isHighlighted = notification.id.toString() === highlightedId;
     
     // Define actions for this notification
     const actions = [
@@ -273,34 +291,39 @@ const NotificationsPage = () => {
     
     return (
       <tr 
-        key={notification.id} 
-        className={`${notification.read ? 'read' : 'unread'} ${isSelected ? 'selected' : ''}`}
+        key={notification.id}
+        ref={isHighlighted ? highlightedNotificationRef : null}
+        className={`
+          notification-row
+          ${isSelected ? 'selected' : ''}
+          ${notification.read ? 'read' : 'unread'}
+          ${isHighlighted ? 'highlighted' : ''}
+        `}
       >
-        <td className="select-cell">
-          <input 
-            type="checkbox" 
+        <td>
+          <input
+            type="checkbox"
             checked={isSelected}
             onChange={() => handleSelectNotification(notification.id)}
           />
         </td>
-        <td className="icon-cell">
+        <td className="notification-type">
           {details.icon}
+          <span>{details.title}</span>
         </td>
-        <td>
-          <div className="notification-content">
-            <div className="notification-title">{details.title}</div>
-            <div className="notification-message">{details.message}</div>
-            <div className="notification-time" title={formatDateTime(notification.timestamp)}>
-              {formatTimeAgo(notification.timestamp)}
-            </div>
-          </div>
+        <td className="notification-message">
+          {details.message}
         </td>
-        <td className="status-cell">
-          {notification.read ? (
-            <span className="status read">Đã đọc</span>
-          ) : (
-            <ActionButtons actions={actions} variant="with-dividers" />
-          )}
+        <td className="notification-time">
+          {formatTimeAgo(notification.timestamp)}
+        </td>
+        <td className="notification-status">
+          <span className={notification.read ? 'read' : 'unread'}>
+            {notification.read ? 'Đã đọc' : 'Chưa đọc'}
+          </span>
+        </td>
+        <td className="notification-actions">
+          <ActionButtons actions={actions} />
         </td>
       </tr>
     );
@@ -468,7 +491,9 @@ const NotificationsPage = () => {
                 </th>
                 <th className="icon-header"></th>
                 <th>Thông báo</th>
+                <th className="status-header">Thời Gian</th>
                 <th className="status-header">Trạng thái</th>
+                <th className="status-header">Hành Động</th>
               </tr>
             </thead>
             <tbody>

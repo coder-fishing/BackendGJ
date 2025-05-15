@@ -1,10 +1,10 @@
 // pages/JobFormPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { jobsApi } from '../services/api';
-import '../styles/JobFormPage.scss';
+import { jobsApi } from '../../services/api';
+import '../../styles/JobFormPage.scss';
 
-import { LoadingSpinner } from '../components/common';
+import { LoadingSpinner } from '../../components/common';
 import { 
   JobFormHeader,
   JobFormBasicInfo,
@@ -12,7 +12,7 @@ import {
   JobFormStatus,
   JobFormDetails,
   JobFormActions
-} from '../components/Job';
+} from '../../components/Job';
 
 const JobFormPage = () => {
   const { id } = useParams();
@@ -146,7 +146,7 @@ const JobFormPage = () => {
         await jobsApi.createJob(formData);
       }
       
-      navigate('/jobs'); // Redirect to job list
+      navigate('/admin/dashboard'); // Redirect to job list
     } catch (err) {
       setError('Có lỗi xảy ra khi lưu bài đăng. Vui lòng thử lại.');
       console.error(err);
@@ -167,7 +167,7 @@ const JobFormPage = () => {
     <div className="job-form-container">
       <JobFormHeader 
         title={isEditMode ? 'Chỉnh sửa Bài đăng' : 'Thêm Bài đăng Mới'}
-        onBack={() => navigate('/jobs')}
+        onBack={() => navigate('/admin/dashboard')}
       />
       
       {error && <div className="error-message">{error}</div>}
@@ -200,7 +200,7 @@ const JobFormPage = () => {
         />
         
         <JobFormActions 
-          onCancel={() => navigate('/jobs')}
+          onCancel={() => navigate('/admin/dashboard')}
           submitting={submitting}
           isEditMode={isEditMode}
         />

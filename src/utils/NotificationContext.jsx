@@ -51,24 +51,55 @@ export const NotificationProvider = ({ children }) => {
   // Set up websocket connection for real-time updates
   useEffect(() => {
     // Extract user ID from auth context or localStorage
-    const userId = localStorage.getItem('userId') || '1'; // Default to 1 if not found
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
     
+    if (!userId) return;
+
     // Connect to WebSocket
     websocketService.connect(userId);
     
     // Listen for new notifications
     websocketService.on('notification', (newNotification) => {
-      // Update notifications state with new notification
-      setNotifications(prev => [newNotification, ...prev]);
-      
-      // Update unread count if notification is unread
-      if (!newNotification.read) {
-        setUnreadCount(prev => prev + 1);
+      // Format notification based on type
+      let formattedNotification = {
+        ...newNotification,
+        read: false,
+        createdAt: new Date().toISOString()
+      };
+
+      switch (newNotification.type) {
+        case 'JOB_APPROVED':
+          formattedNotification.title = 'Bài đăng được duyệt';
+          formattedNotification.message = `Bài đăng "${newNotification.jobTitle}" đã được phê duyệt`;
+          break;
+        case 'JOB_REJECTED':
+          formattedNotification.title = 'Bài đăng bị từ chối';
+          formattedNotification.message = `Bài đăng "${newNotification.jobTitle}" đã bị từ chối${newNotification.reason ? `: ${newNotification.reason}` : ''}`;
+          break;
+        case 'NEW_APPLICATION':
+          formattedNotification.title = 'Ứng viên mới';
+          formattedNotification.message = `${newNotification.applicantName} đã ứng tuyển vào vị trí "${newNotification.jobTitle}"`;
+          break;
+        case 'APPLICATION_STATUS_CHANGED':
+          const statusText = newNotification.status === 'APPROVED' ? 'chấp nhận' : 'từ chối';
+          formattedNotification.title = 'Trạng thái ứng tuyển thay đổi';
+          formattedNotification.message = `Đơn ứng tuyển của bạn vào vị trí "${newNotification.jobTitle}" đã được ${statusText}`;
+          break;
+        default:
+          formattedNotification.title = 'Thông báo mới';
+          formattedNotification.message = newNotification.message;
       }
+
+      // Update notifications state with new notification
+      setNotifications(prev => [formattedNotification, ...prev]);
       
-      // Play sound or show desktop notification if needed
+      // Update unread count
+      setUnreadCount(prev => prev + 1);
+      
+      // Play sound and show desktop notification
       playNotificationSound();
-      showDesktopNotification(newNotification);
+      showDesktopNotification(formattedNotification);
     });
     
     // Clean up on unmount
@@ -80,48 +111,20 @@ export const NotificationProvider = ({ children }) => {
   
   // Play notification sound
   const playNotificationSound = () => {
-    // Implement actual sound playing
     const audio = new Audio('/notification-sound.mp3');
     audio.play().catch(err => console.error('Error playing notification sound:', err));
   };
   
-  // Show desktop notification (if permitted)
+  // Show desktop notification
   const showDesktopNotification = (notification) => {
     if (Notification.permission === 'granted') {
-      let title = 'New Notification';
-      let message = '';
-      
-      // Format title and message based on notification type
-      switch (notification.type) {
-        case 'NEW_JOB':
-          title = 'New Job Submission';
-          message = `Job "${notification.jobTitle}" has been submitted`;
-          break;
-        case 'APPROVE':
-          title = 'Job Approved';
-          message = `Job "${notification.jobTitle}" has been approved`;
-          break;
-        case 'REJECT':
-          title = 'Job Rejected';
-          message = `Job "${notification.jobTitle}" has been rejected`;
-          break;
-        case 'DELETE':
-          title = 'Job Deleted';
-          message = `Job "${notification.jobTitle}" has been deleted`;
-          break;
-        default:
-          message = notification.message || 'You have a new notification';
-      }
-      
-      const options = {
-        body: message,
+      new Notification(notification.title, {
+        body: notification.message,
         icon: '/notification-icon.png'
-      };
-      
-      new Notification(title, options);
+      });
     }
   };
-  
+
   // Request desktop notification permission
   const requestNotificationPermission = async () => {
     if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
@@ -195,7 +198,6 @@ export const NotificationProvider = ({ children }) => {
   // Delete notification
   const deleteNotification = async (notificationId) => {
     try {
-      // Call the API to delete the notification
       await notificationApi.deleteNotification(notificationId);
       
       // Update local state
@@ -214,27 +216,6 @@ export const NotificationProvider = ({ children }) => {
     }
   };
   
-  // Refresh notifications
-  const refreshNotifications = async () => {
-    setLoading(true);
-    try {
-      const notificationsData = await notificationApi.getRecentNotifications();
-      setNotifications(notificationsData);
-      
-      const count = await notificationApi.getUnreadCount();
-      setUnreadCount(count);
-      
-      setError(null);
-      return true;
-    } catch (err) {
-      console.error('Error refreshing notifications:', err);
-      setError('Failed to refresh notifications');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   // Context value
   const value = {
     notifications,
@@ -245,7 +226,6 @@ export const NotificationProvider = ({ children }) => {
     markMultipleAsRead,
     markAllAsRead,
     deleteNotification,
-    refreshNotifications,
     requestNotificationPermission
   };
   

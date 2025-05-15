@@ -1,52 +1,41 @@
 // services/api.js
 import axios from 'axios';
 
+const API_BASE_URL = 'http://localhost:8080/api'; 
+
 // Create axios instance
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
+  withCredentials: false
 });
 
-// Interceptors for request and response
+// Interceptor để thêm token vào header
 apiClient.interceptors.request.use(
   (config) => {
-    console.log(`➡️ [Request] ${config.method?.toUpperCase()} ${config.url}`, config.data || config.params || {});
-    
-    // Add auth token to headers if available
-    const token = localStorage.getItem('adminToken');
-    if (token && !config.headers.Authorization) {
+    const token = localStorage.getItem('token');
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
   (error) => {
-    console.error('❌ [Request Error]:', error);
     return Promise.reject(error);
   }
 );
 
+// Interceptor để xử lý response
 apiClient.interceptors.response.use(
-  (response) => {
-    console.log(`✅ [Response] ${response.config.url}`, response.data);
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.error('❌ [Response Error]:', error);
-
-    if (error.response && error.response.status === 401) {
-      console.warn('⚠️ Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...');
-      
-      // Clear auth data on 401 Unauthorized
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      
-      // Redirect to login page
-      window.location.href = '/admin/login';
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/auth/login';
     }
-
     return Promise.reject(error);
   }
 );
@@ -71,65 +60,171 @@ export const jobsApi = {
   // Get jobs with pagination and status filtering
   getJobspage: async (page = 0, size = 8, status = '') => {
     try {
-      let endpoint = '/jobs';
-      
-      if (status && status !== 'ALL') {
-        endpoint = `/jobs/status/${status}`;
-        console.log(`DEBUG API: Gọi API với status: ${status}, endpoint: ${endpoint}, page: ${page}, size: ${size}`);
+      const params = {
+        page: parseInt(page, 10),
+        size: parseInt(size, 10)
+      };
+  
+      let response;
+  
+      // Nếu status là ALL hoặc rỗng, gọi API lấy tất cả jobs có phân trang
+      if (!status || status === 'ALL') {
+        response = await apiRequest('get', '/jobs', null, params);
       } else {
-        console.log(`DEBUG API: Gọi API cho tất cả jobs, endpoint: ${endpoint}, page: ${page}, size: ${size}`);
+        // Nếu có status cụ thể, gọi API lọc theo status
+        response = await apiRequest(
+          'get', 
+          `/jobs/status/${status.toUpperCase()}`,
+          null,
+          params
+        );
       }
-      
-      // Ensure proper pagination parameters
-      const sizeParam = parseInt(size, 10);
-      const pageParam = parseInt(page, 10);
-      
-      const response = await apiRequest('get', endpoint, null, { 
-        page: pageParam, 
-        size: sizeParam 
-      });
-      
-      // Handle response
-      if (!response) {
-        return { content: [], totalPages: 0, totalElements: 0, number: page, size: size };
+
+      // Xử lý response
+      if (response && typeof response === 'object' && 'content' in response) {
+        return response;
       }
-      
-      // Handle non-standard pagination response
-      if (!response.content) {
-        if (Array.isArray(response)) {
-          // Client-side pagination if server doesn't support it
-          const totalItems = response.length;
-          const totalPages = Math.ceil(totalItems / sizeParam) || 1;
-          const startIndex = pageParam * sizeParam;
-          const endIndex = Math.min(startIndex + sizeParam, totalItems);
-          const paginatedContent = response.slice(startIndex, endIndex);
-          
-          return {
-            content: paginatedContent,
-            totalPages: totalPages,
-            totalElements: totalItems,
-            number: pageParam,
-            size: sizeParam
-          };
-        } else {
-          return { content: [], totalPages: 0, totalElements: 0, number: page, size: size };
-        }
+
+      if (Array.isArray(response)) {
+        const start = page * size;
+        const paginatedContent = response.slice(start, start + size);
+        return {
+          content: paginatedContent,
+          totalPages: Math.ceil(response.length / size),
+          totalElements: response.length,
+          number: page,
+          size: size,
+          empty: paginatedContent.length === 0
+        };
       }
-      
-      // Return standard pagination structure
+
       return {
-        content: response.content || [],
-        totalPages: response.totalPages || 0,
-        totalElements: response.totalElements || 0,
-        number: response.number || page,
-        size: response.size || size
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: page,
+        size: size,
+        empty: true
       };
     } catch (error) {
-      console.error('Error in getJobspage:', error);
-      return { content: [], totalPages: 0, totalElements: 0, number: page, size: size };
+      console.error('API Error:', error);
+      return {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: page,
+        size: size,
+        empty: true
+      };
     }
   },
+
+  // Get employer's jobs with pagination and status filtering
+  getEmployerJobs: async (page = 0, size = 8, status = '') => {
+    try {
+      const params = {
+        page: parseInt(page, 10),
+        size: parseInt(size, 10)
+      };
   
+      let response;
+  
+      // Nếu status là ALL hoặc rỗng, lấy tất cả jobs của employer
+      if (!status || status === 'ALL') {
+        response = await apiRequest('get', '/employer/jobs', null, params);
+      } else {
+        // Nếu có status cụ thể, lọc theo status
+        response = await apiRequest(
+          'get', 
+          `/employer/jobs/status/${status.toUpperCase()}`,
+          null,
+          params
+        );
+      }
+
+      // Xử lý response
+      if (response && typeof response === 'object' && 'content' in response) {
+        return response;
+      }
+
+      if (Array.isArray(response)) {
+        const start = page * size;
+        const paginatedContent = response.slice(start, start + size);
+        return {
+          content: paginatedContent,
+          totalPages: Math.ceil(response.length / size),
+          totalElements: response.length,
+          number: page,
+          size: size,
+          empty: paginatedContent.length === 0
+        };
+      }
+
+      return {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: page,
+        size: size,
+        empty: true
+      };
+    } catch (error) {
+      console.error('Error fetching employer jobs:', error);
+      return {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: page,
+        size: size,
+        empty: true
+      };
+    }
+  },
+
+  // Get employer's job counts by status
+  getEmployerJobCounts: async () => {
+    try {
+      const response = await apiRequest('get', '/employer/jobs/status/count', null, null);
+      
+      if (Array.isArray(response)) {
+        return {
+          total: response.reduce((sum, item) => sum + item.count, 0),
+          pending: response.find(item => item.status === 'PENDING')?.count || 0,
+          approved: response.find(item => item.status === 'APPROVED')?.count || 0,
+          rejected: response.find(item => item.status === 'REJECTED')?.count || 0,
+          deleted: response.find(item => item.status === 'DELETED')?.count || 0
+        };
+      }
+      
+      if (response && typeof response === 'object') {
+        return {
+          total: response.total || 0,
+          pending: response.pending || 0,
+          approved: response.approved || 0,
+          rejected: response.rejected || 0,
+          deleted: response.deleted || 0
+        };
+      }
+      
+      return {
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        deleted: 0
+      };
+    } catch (error) {
+      console.error('Error fetching employer job counts:', error);
+      return {
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        deleted: 0
+      };
+    }
+  },
+
   // Get job counts by status
   getJobsCount: async () => {
     try {
@@ -358,9 +453,16 @@ export const notificationApi = {
 export const websocketService = {
   socket: null,
   callbacks: {},
+  isEnabled: false, // Flag to control whether WebSocket is enabled
 
   // Connect to WebSocket server
   connect: (userId) => {
+    // Skip if not enabled or no userId
+    if (!websocketService.isEnabled || !userId) {
+      console.log('WebSocket is disabled or no user ID provided');
+      return null;
+    }
+    
     const wsUrl = `ws://localhost:8080/ws/notifications/${userId}`;
     console.log(`WebSocket connecting to: ${wsUrl}`);
     
@@ -392,16 +494,22 @@ export const websocketService = {
       websocketService.socket.onclose = () => {
         console.log('WebSocket connection closed');
         websocketService.trigger('disconnected', {});
+        // Don't try to reconnect automatically
       };
       
       websocketService.socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        // Just log the error but don't spam the console with multiple errors
+        console.log('WebSocket connection error - notifications will not be available');
         websocketService.trigger('error', error);
+        // Close the socket to prevent further errors
+        if (websocketService.socket) {
+          websocketService.socket.close();
+        }
       };
       
       return websocketService.socket;
     } catch (error) {
-      console.error('Error establishing WebSocket connection:', error);
+      console.log('WebSocket connection failed - notifications will not be available');
       return null;
     }
   },
@@ -447,3 +555,5 @@ export const websocketService = {
     }
   }
 };
+
+export default apiClient;

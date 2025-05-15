@@ -25,51 +25,22 @@ const LoginPage = () => {
 
   // Check for redirect messages and OAuth callbacks
   useEffect(() => {
-    // Check for OAuth callback tokens in URL
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    const error = params.get('error');
-    
-    if (token) {
-      // Store the token in localStorage
-      localStorage.setItem('adminToken', token);
-      
-      // Get user info if available
-      const userInfo = params.get('user');
-      if (userInfo) {
-        try {
-          const user = JSON.parse(decodeURIComponent(userInfo));
-          localStorage.setItem('adminUser', JSON.stringify(user));
-        } catch (e) {
-          console.error('Error parsing user info:', e);
-        }
+    // Check if already logged in
+    if (isAuthenticated()) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'EMPLOYER') {
+        navigate('/employer/dashboard');
+      } else {
+        navigate('/jobs');
       }
-      
-      setSuccessMessage('Đăng nhập thành công! Đang chuyển hướng...');
-      
-      // Redirect to dashboard
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1000);
-      
-      return;
     }
     
-    if (error) {
-      setError(decodeURIComponent(error));
-      return;
-    }
-    
-    // Regular redirect message check
     if (location.state?.message) {
       setError(location.state.message);
     }
 
-    // Check if already logged in
-    if (isAuthenticated()) {
-      navigate('/dashboard');
-    }
-    
     if (authError) {
       setError(authError);
     }
@@ -78,14 +49,12 @@ const LoginPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error when user types
     if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
     if (!formData.email || !formData.password) {
       setError('Vui lòng nhập đầy đủ thông tin đăng nhập');
       return;
@@ -100,31 +69,21 @@ const LoginPage = () => {
       // Debug localStorage after login
       console.log('========== LOGIN SUCCESS ==========');
       console.log('Login response:', result);
-      console.log('Token after login:', localStorage.getItem('adminToken'));
-      console.log('User after login:', localStorage.getItem('adminUser'));
-      console.log('isAuthenticated:', isAuthenticated());
+      console.log('Token after login:', localStorage.getItem('token'));
+      console.log('User after login:', localStorage.getItem('user'));
       console.log('=================================');
       
-      // Force manual token saving if needed
-      if (!localStorage.getItem('adminToken') && result.token) {
-        console.log('Force saving token to localStorage');
-        localStorage.setItem('adminToken', result.token);
-        
-        if (!localStorage.getItem('adminUser') && result.user) {
-          localStorage.setItem('adminUser', JSON.stringify(result.user));
-        }
-      }
+      // Get user data
+      const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
       
-      // Navigate to dashboard after successful login
-      setTimeout(() => {
-        // Check token one more time before navigating
-        console.log('Final check before navigation:');
-        console.log('- Token:', localStorage.getItem('adminToken'));
-        console.log('- User:', localStorage.getItem('adminUser'));
-        console.log('- isAuthenticated:', isAuthenticated());
-        
-        navigate('/dashboard');
-      }, 1000);
+      // Redirect based on role
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'EMPLOYER') {
+        navigate('/employer/dashboard');
+      } else {
+        navigate('/jobs');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');

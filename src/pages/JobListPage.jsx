@@ -65,8 +65,10 @@ const JobListPage = () => {
   // Cập nhật activeTab khi URL thay đổi
   useEffect(() => {
     if (status) {
+      console.log('Setting status from URL:', status.toUpperCase());
       setActiveTab(status.toUpperCase());
     } else {
+      console.log('Setting status to ALL');
       setActiveTab('ALL');
     }
   }, [status]);
@@ -77,39 +79,39 @@ const JobListPage = () => {
       setLoading(true);
       setError(null);
 
-      // Xác định filter dựa trên tab đang active
-      const statusFilter = activeTab !== 'ALL' ? activeTab : '';
-      console.log(`DEBUG: Fetching jobs with activeTab: ${activeTab}, statusFilter: ${statusFilter}, page: ${page}, pageSize: ${pageSize}`);
-      
-      // Gọi API - đảm bảo truyền đúng tham số page và size
-      const response = await jobsApi.getJobspage(page, pageSize, statusFilter);
-      console.log('DEBUG: API Response:', response);
-      console.log('DEBUG: response.content:', response?.content);
-      console.log('DEBUG: Phân trang - totalPages:', response?.totalPages, 'page hiện tại:', response?.number);
-      // console.log('DEBUG: Size của trang:', response?.size, 'pageSize mong muốn:', pageSize);
-      
-      // Xử lý dữ liệu
-      if (response && response.content) {
-        console.log(`DEBUG: Loaded ${response.content.length} jobs`, response.content);
+      // Lấy status từ URL
+      const currentStatus = status ? status.toUpperCase() : 'ALL';
+      console.log('Current status from URL:', currentStatus);
+
+      const response = await jobsApi.getJobspage(page, pageSize, currentStatus);
+      console.log('API Response:', response);
+
+      if (response?.content) {
         setJobs(response.content);
         setTotalPages(response.totalPages || 1);
+        console.log(`Loaded ${response.content.length} jobs`);
       } else {
-        console.error('DEBUG: Invalid response structure or empty content', response);
         setJobs([]);
         setTotalPages(0);
+        console.log('No jobs found');
       }
 
-      // Luôn gọi để cập nhật số lượng cho các tab
-      fetchJobCounts();
+      await fetchJobCounts();
     } catch (err) {
-      console.error('Error fetching jobs:', err);
-      setError(`Không thể tải dữ liệu công việc: ${err.message || 'Lỗi không xác định'}`);
+      console.error('Error loading jobs:', err);
+      setError('Không thể tải dữ liệu');
       setJobs([]);
       setTotalPages(0);
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch jobs khi status hoặc page thay đổi
+  useEffect(() => {
+    console.log('Status or page changed, fetching jobs...');
+    fetchJobs();
+  }, [status, page]);
 
   // Lấy số lượng job theo từng trạng thái
   const fetchJobCounts = async () => {
@@ -131,12 +133,6 @@ const JobListPage = () => {
     }
   };
 
-  // Gọi API khi có thay đổi về tab hoặc trang
-  useEffect(() => {
-    fetchJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, activeTab]);
-
   // Xử lý khi thay đổi filter
   const handleFilterChange = (newFilters) => {
     setFilters({ ...filters, ...newFilters });
@@ -152,14 +148,13 @@ const JobListPage = () => {
 
   // Xử lý khi click vào tab
   const handleTabChange = (tab) => {
-    // Reset về trang đầu tiên khi đổi tab
+    console.log('Changing tab to:', tab);
     setPage(0);
     
-    // Cập nhật URL để phản ánh tab đang chọn
     if (tab === 'ALL') {
       navigate('/jobs');
     } else {
-      navigate(`/jobs/status/${tab.toLowerCase()}`);
+      navigate(`/admin/jobs/status/${tab.toLowerCase()}`);
     }
   };
 
@@ -193,20 +188,26 @@ const JobListPage = () => {
         title="Quản lý Bài đăng Tuyển dụng" 
         buttonText="Thêm bài đăng" 
         buttonLink="/jobs/add" 
+        data-aos="fade-down"
+        data-aos-duration="800" 
       />
 
       <JobStatusTabs 
         tabs={tabs} 
         activeTab={activeTab} 
         handleTabChange={handleTabChange} 
+        data-aos="fade-up"
+        data-aos-delay="100"
       />
 
       <SearchFilter 
         filters={filters} 
         onFilterChange={handleFilterChange} 
+        data-aos="fade-up"
+        data-aos-delay="200" 
       />
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error-message" data-aos="fade-up">{error}</div>}
 
       <JobTable 
         jobs={jobs}
@@ -218,10 +219,12 @@ const JobListPage = () => {
         getStatusClass={getStatusClass}
         getStatusText={getStatusText}
         refreshJobs={refreshJobs}
+        data-aos="fade-up"
+        data-aos-delay="300"
       />
 
       {/* Debug phân trang */}
-      <div style={{margin: '10px 0', fontSize: '12px', color: '#666'}}>
+      <div style={{margin: '10px 0', fontSize: '12px', color: '#666'}} data-aos="fade-up" data-aos-delay="400">
         Debug: Page {page + 1}/{totalPages} - Số bài đăng: {jobs.length} - PageSize  {pageSize}
       </div>
 
@@ -230,6 +233,8 @@ const JobListPage = () => {
           page={page}
           totalPages={totalPages}
           handlePageChange={handlePageChange}
+          data-aos="fade-up"
+          data-aos-delay="500"
         />
       )}
     </div>

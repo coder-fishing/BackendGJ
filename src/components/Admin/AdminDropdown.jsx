@@ -28,7 +28,7 @@ const AdminDropdown = ({ onClose, buttonRef }) => {
       </div>
       
       <div className="dropdown-menu">
-        <NavLink to="/profile" className="dropdown-item" onClick={onClose}>
+        <NavLink to="/admin/profile" className="dropdown-item" onClick={onClose}>
           <FaUserAlt className="item-icon" />
           <span>Hồ sơ cá nhân</span>
         </NavLink>

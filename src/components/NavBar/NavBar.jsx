@@ -140,12 +140,12 @@ const Navbar = ({ toggleMobile }) => {
           </button>
         </div>
 
-        <div className="navbar-search">
+        {/* <div className="navbar-search">
           <div className="search-input">
             <AiOutlineSearch className="search-icon" />
             <input type="text" placeholder="Tìm kiếm công việc..." />
           </div>
-        </div>
+        </div> */}
 
         <ul className={`navbar-links ${showMobileMenu ? 'mobile-visible' : ''}`}>
           <li>
@@ -154,17 +154,17 @@ const Navbar = ({ toggleMobile }) => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard" className={({isActive}) => isActive ? 'active' : ''}>
+            <NavLink to="/admin/dashboard" className={({isActive}) => isActive ? 'active' : ''}>
               Dashboard
             </NavLink>
           </li>
           <li>
-            <NavLink to="/jobs" className={({isActive}) => isActive ? 'active' : ''}>
+            <NavLink to="/admin/jobs" className={({isActive}) => isActive ? 'active' : ''}>
               Công Việc
             </NavLink>
           </li>
           <li>
-            <NavLink to="/profile" className={({isActive}) => isActive ? 'active' : ''}>
+            <NavLink to="/admin/profile" className={({isActive}) => isActive ? 'active' : ''}>
               Hồ Sơ
             </NavLink>
           </li>

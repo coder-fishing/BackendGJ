@@ -1,0 +1,69 @@
+.status-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    height: 40px;
+    border-radius: 6px;
+  
+    .filter-tab {
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.25s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      color: #000;
+  
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  
+    .status-approved {
+      background-color: #e0f7fa;
+      color: #006064;
+  
+      &:hover {
+        background-color: #b2ebf2;
+      }
+    }
+  
+    .status-pending {
+      background-color: #fff8e1;
+      color: #f57f17;
+  
+      &:hover {
+        background-color: #ffecb3;
+      }
+    }
+  
+    .status-rejected {
+      background-color: #fdecea;
+      color: #c62828;
+  
+      &:hover {
+        background-color: #f8c6c5;
+      }
+    }
+  
+    .status-deleted {
+      background-color: #f3e5f5;
+      color: #6a1b9a;
+  
+      &:hover {
+        background-color: #e1bee7;
+      }
+    }
+  
+    .status-expired {
+      background-color: #eceff1;
+      color: #37474f;
+  
+      &:hover {
+        background-color: #cfd8dc;
+      }
+    }
+  }
+  
