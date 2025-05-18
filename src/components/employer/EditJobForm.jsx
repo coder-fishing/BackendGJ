@@ -48,9 +48,10 @@ const EditJobForm = () => {
   }, [formData.expireAt]);
 
   const now = new Date();
-  now.setDate(now.getDate() + 2 );
-  now.setHours(now.getHours() + 2); // Add 2 hours
-  const minDateTime = now.toISOString().slice(0, 16); 
+  now.setDate(now.getDate() + 2);
+  now.setHours(now.getHours() + 2);
+  // Format lại minDateTime để phù hợp với input type="date"
+  const minDateTime = now.toISOString().split('T')[0];
 
   const fetchJobData = async () => {
     try {
@@ -176,6 +177,7 @@ const EditJobForm = () => {
                       onChange={handleInputChange}
                       required
                       min={minDateTime}
+                      className={new Date(formData.expireAt) < new Date() ? 'expired' : ''}
                     />
                   </div>
                 </div>

@@ -1,0 +1,29 @@
+.container{
+    display: flex;
+    padding: 4.375rem 0rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 4.5rem;
+    align-self: stretch;
+   
+    .content{
+        display: flex;
+        padding: 0rem 2.5rem;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: 8.125rem;
+        align-self: stretch;
+        flex-wrap: wrap;
+         
+    }
+    .titleCenter{
+        text-align: center;
+        color:#0abea9;
+        font-family: "Nunito-Regular", sans-serif;
+        font-size: 2.5rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+    }
+}

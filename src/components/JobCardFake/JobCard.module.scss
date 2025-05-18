@@ -1,0 +1,175 @@
+.container {
+    display: flex;
+    padding: 2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+
+    border-radius: 0.625rem;
+    border: 1px solid #000;
+    min-width: 35rem;
+    min-height: 17rem;
+    position: relative;
+
+    .header {
+        display: flex;
+        align-items: center;
+        gap: 7.4375rem;
+        .wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            .logo {
+                width: 5.5rem;
+                height: 5.5rem;
+            }
+            .group {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+                .name {
+                    color: #000;
+                    text-align: center;
+                    font-family: "Nunito-Regular", sans-serif;
+                    font-size: 1.7rem;
+                    font-style: normal;
+                    font-weight: 700;
+                    line-height: normal;
+                }
+                .address {
+                    color: #000;
+                    text-align: center;
+                    font-family: "Nunito-Regular", sans-serif;
+                    font-size: 1.3rem;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: normal;
+                }
+            }
+        }
+    }
+    .save {
+        width: 2rem;
+        height: 3rem;
+        top: 1rem;
+        right: 1rem;
+        position: absolute;
+        scale: 1.5;
+    }
+    .save:hover {
+        cursor: pointer;
+    }
+    .content {
+        display: flex;
+        width: 23rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        .positton {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            align-self: stretch;
+        }
+        .threeShortdecr {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            align-self: stretch;
+            border-radius: 0.625rem;
+
+            .shortdecr {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                align-self: stretch;
+
+                &:hover {
+                    cursor: pointer;
+                    // background: #20c6b1;
+                    transition: all 0.3s ease;
+                    scale: 1.01;
+                }
+
+                .shortdecrcontent {
+                    display: flex;
+                    padding: 0.25rem 0.5rem;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 0.875rem;
+
+                    border-radius: 0.125rem;
+                    background: #ebf0f3;
+                }
+            }
+        }
+
+        .longdecr {
+            width: 30rem;
+            height: 60px;
+            max-height: 4.75em; /* Giới hạn chiều cao */
+            overflow: hidden; /* Ẩn phần nội dung vượt quá */
+        }
+
+        .decription {
+            display: -webkit-box; /* Sử dụng box layout để cắt ngắn văn bản */
+            -webkit-line-clamp: 4; /* Hiển thị tối đa 3 dòng */
+            line-clamp: 4; /* Hiển thị tối đa 3 dòng */
+            -webkit-box-orient: vertical; /* Đặt hướng dòng dọc cho box layout */
+            overflow: hidden; /* Ẩn phần nội dung vượt quá */
+            text-overflow: ellipsis; /* Thêm dấu "..." khi văn bản bị cắt ngắn */
+
+            color: #000;
+            font-family: "Nunito-Regular", sans-serif;
+            font-size: 1.3rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.5rem; /* 142.857% */
+            flex: 1 0 0;
+        }
+    }
+    .footer {
+        display: flex;
+        width: 30rem;
+        height: 3.5rem;
+        align-items: center;
+        gap: 1rem;
+
+        .buttonApply {
+            width: 3rem;
+            display: flex;
+            height: 3.5rem;
+            padding: 0.5rem 1rem;
+            justify-content: center;
+            align-items: center;
+            gap: 0.625rem;
+            flex: 1 0 0;
+            &:hover {
+                cursor: pointer;
+                background: #fff;
+                border: 1px solid #20c6b1;
+                color: #20c6b1;
+            }
+        }
+        .buttonReadMore {
+            // background: #fff;
+            width: 1rem;
+            display: flex;
+            height: 3.5rem;
+            padding: 0.5rem 1rem;
+            justify-content: center;
+            align-items: center;
+            gap: 0.625rem;
+            flex: 1 0 0;
+        }
+    }
+
+    &:hover {
+        cursor: pointer;
+        border: 1px solid #20c6b1;  
+        transition: all 0.3s ease;
+        scale: 1.01;
+    }
+}

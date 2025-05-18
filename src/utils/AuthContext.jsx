@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import authApi from '../services/authApi';
 import authService from '../services/authService';
 import { apiClient } from '../services/api';
+import axios from 'axios';
 
 // Function to test storage functionality
 const testBrowserStorage = () => {
@@ -111,107 +112,62 @@ export const AuthProvider = ({ children }) => {
             // Parse user data first
             const user = JSON.parse(userStr);
             
+            // Set token in axios headers IMMEDIATELY
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Set for both axios instances
+            console.log('Token set in headers:', `Bearer ${token.substring(0, 20)}...`);
+            
             // Set the currentUser immediately to ensure it's available
             setCurrentUser(user);
             console.log('Setting current user from storage:', user);
             
-            // Check if token is a JWT token
+            // Token validation happens after setting initial state
             if (isJwtToken(token)) {
-              // JWT token validation
               const decodedToken = decodeJwt(token);
-              
-              if (!decodedToken) {
-                console.log('Invalid JWT token format');
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('user');
-                localStorage.removeItem('adminUser');
-                setCurrentUser(null);
+              if (!decodedToken || (decodedToken.exp && decodedToken.exp < Math.floor(Date.now() / 1000))) {
+                console.log('JWT token is invalid or expired');
+                clearAuthData();
                 return;
               }
-              
-              // Check JWT expiration
-              const now = Math.floor(Date.now() / 1000);
-              if (decodedToken.exp && decodedToken.exp < now) {
-                console.log('JWT token has expired');
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('user');
-                localStorage.removeItem('adminUser');
-                setCurrentUser(null);
-                return;
-              }
-              
-              // Set token in axios headers
-              apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-              console.log('JWT token set in headers');
             } else {
-              // Custom token format validation
               try {
                 const tokenData = JSON.parse(atob(token));
                 const now = new Date().getTime();
                 const tokenAge = now - tokenData.timestamp;
-                const isValid = tokenAge < 24 * 60 * 60 * 1000; // 24 hours
-
-                if (!isValid) {
+                if (tokenAge >= 24 * 60 * 60 * 1000) {
                   console.log('Custom token has expired');
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('adminToken');
-                  localStorage.removeItem('user');
-                  localStorage.removeItem('adminUser');
-                  setCurrentUser(null);
+                  clearAuthData();
                   return;
                 }
-
-                // Set token in axios headers
-                apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                console.log('Custom token set in headers');
               } catch (error) {
                 console.error('Invalid custom token format:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('user');
-                localStorage.removeItem('adminUser');
-                setCurrentUser(null);
+                clearAuthData();
+                return;
               }
             }
           } catch (err) {
             console.error('Error during auth initialization:', err);
-            // If verification fails, clear everything
-            localStorage.removeItem('token');
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('user');
-            localStorage.removeItem('adminUser');
-            setCurrentUser(null);
-            delete apiClient.defaults.headers.common['Authorization'];
+            clearAuthData();
           }
         } else {
-          console.log('No valid auth data found in storage');
-          setCurrentUser(null);
-          delete apiClient.defaults.headers.common['Authorization'];
+          clearAuthData();
         }
-
-        // Wait for state update to complete
-        setTimeout(() => {
-          const storedUser = JSON.parse(localStorage.getItem('user') || localStorage.getItem('adminUser') || 'null');
-          console.log('=== AUTH INITIALIZATION COMPLETE ===');
-          console.log('Final auth state:', {
-            currentUser: storedUser,
-            currentUserInState: currentUser,
-            hasToken: !!apiClient.defaults.headers.common['Authorization']
-          });
-        }, 0);
       } catch (err) {
         console.error('Auth initialization failed:', err);
-        localStorage.removeItem('token');
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('adminUser');
-        setCurrentUser(null);
-        delete apiClient.defaults.headers.common['Authorization'];
+        clearAuthData();
       } finally {
         setLoading(false);
       }
+    };
+
+    const clearAuthData = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('adminUser');
+      setCurrentUser(null);
+      delete apiClient.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common['Authorization'];
     };
 
     initializeAuth();
@@ -227,6 +183,7 @@ export const AuthProvider = ({ children }) => {
       if (response.token && response.user) {
         // Set token in headers
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
         
         // Set user state
         setCurrentUser(response.user);
@@ -285,6 +242,7 @@ export const AuthProvider = ({ children }) => {
       if (response.token && response.user) {
         // Set token in headers
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
         console.log('Token set in headers:', apiClient.defaults.headers.common['Authorization']);
         
         try {
@@ -379,6 +337,7 @@ export const AuthProvider = ({ children }) => {
 
       // Clear auth header
       delete apiClient.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common['Authorization'];
       console.log('Auth header cleared');
 
       // Clear localStorage
@@ -405,6 +364,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('adminUser');
       setCurrentUser(null);
       delete apiClient.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common['Authorization'];
       navigate('/auth/login');
     }
   };

@@ -1,0 +1,160 @@
+.container {
+    padding: 2rem 2.5rem;
+    max-width: 130rem;
+    margin: 0 auto;
+    min-height: calc(100vh - 100px);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    .title {
+        font-size: 2.5rem;
+        color: #2d3436;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+
+        .icon {
+            color: #20c6b1;
+        }
+    }
+
+    .subtitle {
+        font-size: 1.6rem;
+        color: #636e72;
+    }
+}
+
+.applications-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.application-card {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+}
+
+.application-details {
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.application-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.applied-date {
+    font-size: 1.4rem;
+    color: #64748b;
+}
+
+.status {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+
+    &.status-pending {
+        background-color: #fff8e1;
+        color: #f59e0b;
+    }
+
+    &.status-accepted {
+        background-color: #dcfce7;
+        color: #22c55e;
+    }
+
+    &.status-rejected {
+        background-color: #fee2e2;
+        color: #ef4444;
+    }
+}
+
+.cover-letter {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+
+    h3 {
+        font-size: 1.6rem;
+        color: #475569;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        font-size: 1.4rem;
+        color: #64748b;
+        line-height: 1.6;
+    }
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.error-message {
+    text-align: center;
+    color: #e74c3c;
+    padding: 2rem;
+    font-size: 1.6rem;
+    background: #fff3f3;
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
+.no-applications {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f8fafc;
+    border-radius: 1rem;
+    color: #64748b;
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: #475569;
+    }
+
+    p {
+        font-size: 1.4rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .applications-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .applications-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+} 

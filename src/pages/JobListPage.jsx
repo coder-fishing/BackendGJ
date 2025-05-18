@@ -152,7 +152,7 @@ const JobListPage = () => {
     setPage(0);
     
     if (tab === 'ALL') {
-      navigate('/jobs');
+      navigate('admin/jobs');
     } else {
       navigate(`/admin/jobs/status/${tab.toLowerCase()}`);
     }

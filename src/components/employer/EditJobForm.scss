@@ -653,3 +653,19 @@
 #location {
     width: 90%;
 }
+
+input[type="date"] {
+  &.expired {
+    border-color: #ff4d4f;
+    background-color: #fff2f0;
+    
+    &:focus {
+      border-color: #ff4d4f;
+      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+    }
+    
+    &::placeholder {
+      color: #ff4d4f;
+    }
+  }
+}

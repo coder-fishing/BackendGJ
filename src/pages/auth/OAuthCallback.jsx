@@ -98,6 +98,7 @@ const OAuthCallback = () => {
             
             if (accessToken) {
               const decodedToken = decodeToken(accessToken);
+              console.log("Decoded token data:", decodedToken);
               if (decodedToken) {
                 const email = decodedToken.email || decodedToken.sub;
                 
@@ -107,11 +108,18 @@ const OAuthCallback = () => {
                 if (existingUser) {
                   // Nếu user đã tồn tại, lấy thông tin đầy đủ từ server
                   const userData = await fetchUserData(existingUser.id);
+                  console.log("Existing user data:", userData);
                   if (userData) {
                     localStorage.setItem('token', accessToken);
-                    localStorage.setItem('user', JSON.stringify(userData));
+                    localStorage.setItem('user', JSON.stringify({
+                      ...userData,
+                      id: userData.id  // Make sure we use the actual database ID
+                    }));
                     axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-                    updateCurrentUser(userData);
+                    updateCurrentUser({
+                      ...userData,
+                      id: userData.id  // Make sure we use the actual database ID
+                    });
                     
                     if (userData.role === 'EMPLOYER') {
                       setTimeout(() => navigate('/employer/dashboard'), 500);
@@ -124,13 +132,14 @@ const OAuthCallback = () => {
                 } else {
                   // Nếu là user mới, tạo thông tin mới
                   const newUserData = {
-                    id: decodedToken.id || decodedToken.sub,
+                    id: '0',  // Use '0' as initial ID, server will assign actual ID
                     email: email,
                     role: decodedToken.role || 'USER',
                     fullName: decodedToken.name || '',
                     active: true
                   };
                   
+                  console.log("Creating new user with data:", newUserData);
                   localStorage.setItem('token', accessToken);
                   localStorage.setItem('user', JSON.stringify(newUserData));
                   axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -191,7 +200,7 @@ const OAuthCallback = () => {
             } else {
               // Nếu là user mới, tạo thông tin mới
               const newUserData = {
-                id: decodedToken.id || decodedToken.sub,
+                id: decodedToken.sub,
                 email: email,
                 role: decodedToken.role || 'USER',
                 fullName: decodedToken.name || '',

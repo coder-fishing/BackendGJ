@@ -1,0 +1,129 @@
+.container {
+    display: flex;
+    padding: 0rem 0rem 4.375rem 0rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.5rem;
+    align-self: stretch;
+    margin: auto;
+    width: 120rem;
+
+    .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        align-self: stretch;
+
+        .decritpions {
+            color: #000;
+            text-align: center;
+            font-family: "Nunito-Regular", sans-serif;
+            font-size: 1.125rem;
+            font-weight: 400;
+            line-height: normal;
+        }
+    }
+
+    .categories {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: 2rem;
+        align-self: stretch;
+        flex-wrap: wrap;
+    }
+
+    .fordwardAndBck {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+
+        .arrowLeft:hover {
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+
+        .arrowRight:hover {
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+    }
+}
+
+/* Mobile-specific Styles (max-width 768px) */
+@media (max-width: 768px) {
+    .container {
+        width: 100%; /* Use full width on smaller screens */
+        padding: 0 1rem 3rem 1rem; /* Add padding for better spacing */
+    }
+
+    .header {
+        gap: 1.5rem;
+    }
+
+    .decritpions {
+        font-size: 1rem; /* Slightly smaller text for mobile */
+        padding: 0 1rem; /* Add padding for readability */
+    }
+
+    .categories {
+        flex-direction: column; /* Stack categories vertically */
+        gap: 1.5rem;
+        width: 100%; /* Make categories take the full width */
+    }
+
+    .fordwardAndBck {
+        justify-content: center; /* Center the arrows */
+        gap: 1rem;
+
+        .arrowLeft, .arrowRight {
+            width: 30px; /* Make arrows smaller on mobile */
+            height: 30px;
+        }
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        width: 100%;
+    }
+
+    .categories {
+        width: 100%;
+        gap: 1.5rem;
+    }
+    
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 100%;
+
+    }
+    .header {
+        gap: 1rem; 
+    }
+
+    .decritpions {
+        font-size: 0.875rem;
+        line-height: 1.4;
+    }
+
+    .categories {
+        gap: 1rem;
+    }
+
+    .fordwardAndBck {
+        flex-direction: column; 
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .arrowLeft, .arrowRight {
+        width: 25px; 
+        height: 25px;
+    }
+}

@@ -10,16 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tippyjs/react": "^4.2.6",
     "antd": "^5.25.1",
     "aos": "^2.3.4",
     "axios": "^1.9.0",
     "chart.js": "^4.4.9",
+    "date-fns": "^4.1.0",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.5.2"
+    "react-modal": "^3.16.3",
+    "react-router-dom": "^7.5.2",
+    "react-spinners": "^0.17.0",
+    "tippy": "^0.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

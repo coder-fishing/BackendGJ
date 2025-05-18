@@ -1,0 +1,118 @@
+.container {
+    display: flex;
+    padding: 7.5rem 2.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    align-self: stretch;
+
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3.5rem;
+        border-radius: 0.125rem;
+        background: #20C6B1;
+        padding: 4.375rem 2.5rem;
+        width: 70%;
+        height: 25rem;
+        max-width: 100%;
+        box-sizing: border-box;
+        border-radius: 0.925rem;
+
+        .header {
+            display: flex;
+            padding: 0.625rem;
+            justify-content: center;
+            align-items: center;
+            gap: 0.625rem;
+
+            .meassage {
+                color: #FFF;
+                text-align: center;
+                font-family: "Nunito-Regular", sans-serif;
+                font-size: 2rem;
+                font-weight: 700;
+                line-height: 3rem;
+            }
+        }
+
+        .input {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 0.625rem;
+            width: 100%;
+
+            &Name {
+                width: 60%;
+                padding: 1rem 2rem;
+                height: 3.7rem;
+                margin-top: 1.5rem;
+                border-radius: 0.525rem;
+                &::placeholder {
+                    color: rgba(0, 0, 0, 0.50);
+                    text-align: center;
+                    font-family: Nunito;
+                    font-size: 1.3rem;
+                    font-weight: 400;
+                    line-height: normal;
+                }
+            }
+
+            &ButttonSubcribe {
+                margin-top: 1.5rem;
+                width: 30%;
+                height: 3.7rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 1rem 2rem;
+                border: none;
+                background: #000;
+                color: #FFF;
+                text-align: center;
+                font-size: 1.3rem;
+                border-radius: 0.525rem;
+                &:hover {
+                    cursor: pointer;
+                    background: #fff;
+                    border: 1px solid #20c6b1;
+                    color: #20c6b1;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 5rem 1.5rem;
+    
+
+    .content {
+        width: 100%;
+        padding: 2.5rem;
+        height: auto;
+    }
+
+    .input {
+        display: flex;
+        flex-direction: column;
+        width: 150%;
+        margin-top: -30px;
+        .inputName {
+            width: 100%;
+            padding: 0.8rem 1.5rem;
+        }
+
+        .inputButttonSubcribe {
+            width: 70%;
+            padding: 1rem;
+        }
+    }
+}
+   
+}

@@ -1,0 +1,53 @@
+.container{
+    display: flex;
+    gap: 3rem;
+}
+.clearButton {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #999;
+    margin-left: -25px;
+
+    &:hover {
+        color: #000;
+    }
+}
+.findAndApplySearch{
+    
+
+    &Input {
+        padding: 0.5rem 1rem;
+        width: 35rem;
+        height: 3.5875rem;
+        border-radius: 10px;
+        border: 1px solid #20c6b1;
+        padding-right: 40px;
+    }
+    &Button {
+        
+        display: flex;
+        height: 3.5875rem;
+        padding: 0.625rem;
+        justify-content: center;
+        align-items: center;
+        gap: 0.625rem;
+        // flex: 1 0 0;
+        border-radius: 10px;
+        background: #20c6b1;
+        color: #fff;
+        font-family: Nunito;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        width: 30px;
+        &:hover {
+            border: 1px solid #20c6b1;
+            background: #fff;
+            color: #20c6b1;
+        }
+    }
+   
+}

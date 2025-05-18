@@ -37,12 +37,12 @@ const UserHeader = () => {
     <header className="user-header">
       <div className="header-container">
         <div className="header-left">
-          <Link to="/" className="logo">
+          <Link to="/user/dashboard" className="logo">
             <span className="logo-text">GoodJob</span>
           </Link>
         </div>
 
-        <form className="search-form" onSubmit={handleSearch}>
+        {/* <form className="search-form" onSubmit={handleSearch}>
           <div className="search-input-container">
             <input
               type="text"
@@ -55,18 +55,18 @@ const UserHeader = () => {
               <FaSearch />
             </button>
           </div>
-        </form>
+        </form> */}
 
         <nav className="header-nav">
-          <Link to="/" className="nav-item">
+          <Link to="/user/dashboard" className="nav-item">
             Trang chủ
           </Link>
-          <Link to="/jobs" className="nav-item">
+          <Link to="/user/jobs" className="nav-item">
             Việc làm
           </Link>
-          <Link to="/user/dashboard" className="nav-item">
+          {/* <Link to="/user/dashboard" className="nav-item">
             Bảng điều khiển
-          </Link>
+          </Link> */}
           <Link to="/user/saved-jobs" className="nav-item">
             <FaBookmark /> Đã lưu
           </Link>
@@ -76,7 +76,7 @@ const UserHeader = () => {
         </nav>
 
         <div className="header-right">
-          <div className="notifications" onClick={() => setShowNotifications(!showNotifications)}>
+          {/* <div className="notifications" onClick={() => setShowNotifications(!showNotifications)}>
             <FaBell />
             <span className="notification-badge">2</span>
             {showNotifications && (
@@ -106,11 +106,11 @@ const UserHeader = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="profile-menu">
             <div className="profile-trigger" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-              <img src={defaultAvatar} alt="Avatar" className="avatar" />
+              <img src={defaultAvatar || currentUser?.avatarUrl} alt="Avatar" className="avatar" />
               <span className="username">{getFullName()}</span>
               <FaCaretDown />
             </div>
@@ -139,11 +139,11 @@ const UserHeader = () => {
         </div>
       </div>
 
-      {(showNotifications || showProfileMenu) && (
+      {( showProfileMenu) && (
         <div className="overlay" onClick={handleClickOutside} />
       )}
     </header>
   );
 };
 
-export default UserHeader; 
+export default  UserHeader; 

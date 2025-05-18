@@ -7,11 +7,9 @@ const UserLayout = () => {
   return (
     <div className="user-layout">
       <UserHeader />
-      <main className="user-main">
-        <div className="user-content">
+      
           <Outlet />
-        </div>
-      </main>
+        
     </div>
   );
 };

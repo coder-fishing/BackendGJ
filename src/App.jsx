@@ -30,6 +30,14 @@ import UserLayout from './components/user/UserLayout';
 import ChangePassword from './pages/user/ChangePassword';
 import EditJobForm from './components/employer/EditJobForm';
 import EmployerSetting from './pages/employer/EmployerSetting';
+import Modal from 'react-modal';
+import JobList from './components/JobList';
+import SavedJobs from './pages/user/SavedJobs';
+import AppliedJobs from './pages/user/AppliedJobs';
+import UserProfile from './components/user/UserProfile';
+
+// Set the app element for react-modal
+Modal.setAppElement('#root');
 
 const AuthProviderWithRouter = ({ children }) => (
   <BrowserRouter>
@@ -52,8 +60,8 @@ const App = () => {
           
           {/* Public routes */}
           <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/jobs" replace />} />
-            <Route path="jobs" element={<JobListPage />} />
+            <Route index element={<Navigate to="/main" replace />} />
+            <Route path="main" element={<UserDashboard />} />
           </Route>
 
           {/* Auth routes - public */}
@@ -106,10 +114,11 @@ const App = () => {
           <Route element={<AuthGuard requireRole="ROLE_USER" />}>
             <Route path="/user" element={<UserLayout />}>
               <Route path="dashboard" element={<UserDashboard />} />
+              <Route path="jobs" element={<JobList />} />
               <Route path="change-password" element={<ChangePassword />} />
-              <Route path="profile" element={<div>User Profile Page</div>} />
-              <Route path="saved-jobs" element={<div>Saved Jobs Page</div>} />
-              <Route path="applications" element={<div>Applications Page</div>} />
+              <Route path="profile" element={<UserProfile />} />
+              <Route path="saved-jobs" element={<SavedJobs />} />
+              <Route path="applications" element={<AppliedJobs />} />
               <Route path="notifications" element={<div>Notifications Page</div>} />
               <Route path="settings" element={<div>Settings Page</div>} />
             </Route>

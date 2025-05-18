@@ -1,0 +1,68 @@
+.container {
+    display: flex;
+    width: 27.75rem;
+    height: 16.875rem;
+    padding: 1.5rem 1rem;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.75rem;
+
+    border-radius: 0.625rem;
+    background: #ebf0f3;
+    &:hover{
+        cursor: pointer;
+        transform: translateY(-5px);
+        background: #20c6b1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        .Decription{
+            color: #fff;
+        }
+    }
+    .categotyImage {
+        width: 4rem;
+        height: 4.71426rem;
+        flex-shrink: 0;
+        margin-top: 2rem;
+    }
+
+    .wrapper {
+        display: flex;
+        width: 14.5625rem;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        top:2rem;
+        .Name {
+            height: 1.5rem;
+            width: 14.5625rem;
+            align-self: stretch;
+            text-align: center;
+            color: #000;
+            text-align: center;
+            font-family: "nunito";
+            font-size: 1.5rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+        .Decription {
+            width: 11.5625rem;
+            height: 1.4375rem;
+
+            color: #000;
+            text-align: center;
+            font-family: "Nunito-Regular", sans-serif;
+            font-size: 1rem;
+            font-style: normal;
+            font-weight: 700;
+            line-height: normal;
+            text-decoration-line: underline;
+        }
+    }
+}
+.container:hover .Decription {
+    color: #fff;
+    font-weight: 400;
+}
